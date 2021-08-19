@@ -12,7 +12,7 @@
         tools:targetApi="n_mr1">
         <intent
             android:action="android.intent.action.VIEW"
-            android:targetPackage="org.hcilab.projects.nlogx"
+            android:targetPackage="org.hcilab.projects.nlogx.azuo"
             android:targetClass="org.hcilab.projects.nlogx.ui.BrowseActivity" />
     </shortcut>
 
