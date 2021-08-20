@@ -147,13 +147,13 @@ public class DetailsActivity extends AppCompatActivity {
 				if(SHOW_RELATIVE_DATE_TIME) {
 					tvDate.setText(DateUtils.getRelativeDateTimeString(
 							this,
-							json.optLong("systemTime"),
+							json.optLong("when"),
 							DateUtils.MINUTE_IN_MILLIS,
 							DateUtils.WEEK_IN_MILLIS,
 							0));
 				} else {
 					DateFormat format = DateFormat.getDateTimeInstance(DateFormat.DEFAULT, DateFormat.SHORT, Locale.getDefault());
-					tvDate.setText(format.format(json.optLong("systemTime")));
+					tvDate.setText(format.format(json.optLong("when")));
 				}
 
 				try {

@@ -31,9 +31,8 @@ class NotificationObject {
 				key = sbn.getKey();
 				o.put("key", str(key));
 			}
-			o.put("systemTime", System.currentTimeMillis());
-			o.put("postTime", sbn.getPostTime());
 			Notification n = sbn.getNotification();
+			o.put("when", n.when);
 			if (n.extras != null) {
 				o.putOpt("title", n.extras.getCharSequence(NotificationCompat.EXTRA_TITLE));
 				o.putOpt("text", n.extras.getCharSequence(NotificationCompat.EXTRA_TEXT));
@@ -46,22 +45,28 @@ class NotificationObject {
 			if (Build.VERSION.SDK_INT >= 29) o.put("opPkg", str(sbn.getOpPkg()));
 			if (Build.VERSION.SDK_INT >= 29) o.put("uid", sbn.getUid());
 			if (Build.VERSION.SDK_INT >= 21) o.put("user", str(sbn.getUser()));
-			o.put("userId", sbn.getUserId());
+			else                             o.put("userId", sbn.getUserId());
 			if (Build.VERSION.SDK_INT >= 24) o.put("group", sbn.isGroup());
 			if (Build.VERSION.SDK_INT >= 21) o.put("groupKey", str(sbn.getGroupKey()));
 			if (Build.VERSION.SDK_INT >= 24) o.put("overrideGroupKey", str(sbn.getOverrideGroupKey()));
-			o.put("clearable", sbn.isClearable());
 			o.put("ongoing", sbn.isOngoing());
+			o.put("clearable", sbn.isClearable());
 			o.put("tag", str(sbn.getTag()));
+			o.put("postTime", sbn.getPostTime());
+			o.put("logTime", System.currentTimeMillis());
 
 			JSONObject no = new JSONObject();
 			o.put("notification", no);
 			no.put("when", n.when);
 			no.put("iconLevel", n.iconLevel);
-			no.put("icon", n.icon);
-			if (Build.VERSION.SDK_INT >= 23) no.put("smallIcon", str(n.getSmallIcon()));
-			if (Build.VERSION.SDK_INT >= 23) no.put("largeIcon", str(n.getLargeIcon()));
-			else no.put("largeIcon", str(n.largeIcon));
+			if (Build.VERSION.SDK_INT < 23) {
+				no.put("icon", n.icon);
+				no.put("largeIcon", str(n.largeIcon));
+			}
+			else {
+				no.put("smallIcon", str(n.getSmallIcon()));
+				no.put("largeIcon", str(n.getLargeIcon()));
+			}
 			if (Build.VERSION.SDK_INT >= 21) no.put("color", n.color);
 			if (Build.VERSION.SDK_INT >= 26) no.put("badgeIconType", n.getBadgeIconType());
 			if (Build.VERSION.SDK_INT >= 29) no.put("bubbleMetadata", str(n.getBubbleMetadata()));
@@ -77,22 +82,31 @@ class NotificationObject {
 			no.put("contentIntent", str(n.contentIntent));
 			no.put("deleteIntent", str(n.deleteIntent));
 			no.put("fullScreenIntent", str(n.fullScreenIntent));
-			no.put("contentView", str(n.contentView));
-			no.put("bigContentView", str(n.bigContentView));
-			if (Build.VERSION.SDK_INT >= 21) no.put("headsUpContentView", str(n.headsUpContentView));
-			no.put("tickerView", str(n.tickerView));
+			if (Build.VERSION.SDK_INT < 24) {
+				no.put("contentView", str(n.contentView));
+				no.put("bigContentView", str(n.bigContentView));
+				if (Build.VERSION.SDK_INT >= 21)
+					no.put("headsUpContentView", str(n.headsUpContentView));
+				else
+					no.put("tickerView", str(n.tickerView));
+			}
 			if (LOG_TEXT) {
 				no.put("tickerText", str(n.tickerText));
 			}
-			no.put("defaults", n.defaults);
-			no.put("audioStreamType", n.audioStreamType);
-			no.put("sound", str(n.sound));
-			no.put("vibrate", str(n.vibrate));
-			no.put("ledARGB", n.ledARGB);
-			no.put("ledOnMS", n.ledOnMS);
-			no.put("ledOffMS", n.ledOffMS);
 			no.put("number", n.number);
-			no.put("priority", n.priority);
+			if (Build.VERSION.SDK_INT < 26) {
+				no.put("priority", n.priority);
+				no.put("defaults", n.defaults);
+				no.put("sound", str(n.sound));
+				if (Build.VERSION.SDK_INT < 21)
+					no.put("audioStreamType", n.audioStreamType);
+				else
+					no.put("audioAttributes", str(n.audioAttributes));
+				no.put("vibrate", str(n.vibrate == null ? null : Arrays.toString(n.vibrate)));
+				no.put("ledARGB", n.ledARGB);
+				no.put("ledOnMS", n.ledOnMS);
+				no.put("ledOffMS", n.ledOffMS);
+			}
 			if (Build.VERSION.SDK_INT >= 20) no.put("sortKey", str(n.getSortKey()));
 			if (Build.VERSION.SDK_INT >= 26) no.put("timeoutAfter", n.getTimeoutAfter());
 			if (Build.VERSION.SDK_INT >= 26) no.put("groupAlertBehavior", n.getGroupAlertBehavior());

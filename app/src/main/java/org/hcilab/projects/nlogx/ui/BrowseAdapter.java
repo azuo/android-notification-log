@@ -197,7 +197,7 @@ class BrowseAdapter extends RecyclerView.Adapter<BrowseViewHolder> {
 					iconCache.put(packageName, Util.getAppIconFromPackage(context, packageName));
 				}
 
-				date = format.format(json.optLong("systemTime"));
+				date = format.format(json.optLong("postTime"));
 				showDate = true;
 			} catch (JSONException e) {
 				if(Const.DEBUG) e.printStackTrace();
