@@ -10,6 +10,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
+import android.text.TextUtils;
 import android.text.format.DateUtils;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -129,18 +130,19 @@ public class DetailsActivity extends AppCompatActivity {
 		CardView card = findViewById(R.id.card);
 		CardView buttons = findViewById(R.id.buttons);
 		if(json != null) {
-			packageName = json.optString("packageName", "???");
-			String titleText   = json.optString("title");
-			String contentText = json.optString("text");
-			String text = (titleText + "\n" + contentText).trim();
-			if(!"".equals(text)) {
+			packageName = json.optString("packageName");
+			if(!TextUtils.isEmpty(packageName)) {
 				card.setVisibility(View.VISIBLE);
 				ImageView icon = findViewById(R.id.icon);
 				icon.setImageDrawable(Util.getAppIconFromPackage(this, packageName));
 				TextView tvName = findViewById(R.id.name);
 				tvName.setText(Util.getAppNameFromPackage(this, packageName, false));
 				TextView tvText = findViewById(R.id.text);
+				String titleText   = json.optString("title");
+				String contentText = json.optString("text");
+				String text = (titleText + "\n" + contentText).trim();
 				tvText.setText(text);
+				tvText.setVisibility(!"".equals(text) ? View.VISIBLE : View.GONE);
 				TextView tvDate = findViewById(R.id.date);
 				if(SHOW_RELATIVE_DATE_TIME) {
 					tvDate.setText(DateUtils.getRelativeDateTimeString(

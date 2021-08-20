@@ -8,8 +8,8 @@ public class Const {
 	public static final long VERSION  = BuildConfig.VERSION_CODE;
 
 	// Feature flags
-	public static final boolean ENABLE_ACTIVITY_RECOGNITION = true;
-	public static final boolean ENABLE_LOCATION_SERVICE     = true;
+	public static final boolean ENABLE_ACTIVITY_RECOGNITION = false;
+	public static final boolean ENABLE_LOCATION_SERVICE     = false;
 
 	// Preferences shown in the UI
 	public static final String PREF_STATUS  = "pref_status";
