@@ -32,7 +32,6 @@ class NotificationObject {
 				o.put("key", str(key));
 			}
 			Notification n = sbn.getNotification();
-			o.put("when", n.when);
 			if (n.extras != null) {
 				o.putOpt("title", n.extras.getCharSequence(NotificationCompat.EXTRA_TITLE));
 				o.putOpt("text", n.extras.getCharSequence(NotificationCompat.EXTRA_TEXT));

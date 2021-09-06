@@ -13,6 +13,8 @@
     <string name="menu_refresh">Refresh</string>
     <string name="menu_delete">Delete</string>
     <string name="menu_export">Export</string>
+    <string name="menu_search">Search</string>
+    <string name="menu_standby">Standby apps</string>
 
     <!-- Settings categories -->
     <string name="category_settings">Settings</string>

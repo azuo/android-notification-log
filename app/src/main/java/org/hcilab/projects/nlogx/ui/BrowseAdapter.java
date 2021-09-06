@@ -8,6 +8,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Handler;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -42,6 +43,7 @@ class BrowseAdapter extends RecyclerView.Adapter<BrowseViewHolder> {
 	private Handler handler = new Handler();
 
 	private String lastDate = "";
+	private DataItem lastItem = null;
 	private boolean shouldLoadMore = true;
 
 	BrowseAdapter(Activity context) {
@@ -75,24 +77,19 @@ class BrowseAdapter extends RecyclerView.Adapter<BrowseViewHolder> {
 	public void onBindViewHolder(@NonNull BrowseViewHolder vh, int position) {
 		DataItem item = data.get(position);
 
-		if(iconCache.containsKey(item.getPackageName()) && iconCache.get(item.getPackageName()) != null) {
-			vh.icon.setImageDrawable(iconCache.get(item.getPackageName()));
+		String packageName = item.getPackageName();
+		if(!iconCache.containsKey(packageName)) {
+			iconCache.put(packageName, Util.getAppIconFromPackage(context, packageName));
+		}
+		if(iconCache.get(packageName) != null) {
+			vh.icon.setImageDrawable(iconCache.get(packageName));
 		} else {
 			vh.icon.setImageResource(R.mipmap.ic_launcher);
 		}
 
 		vh.item.setTag("" + item.getId());
-		vh.name.setText(item.getAppName());
-
-		if(item.getPreview().length() == 0) {
-			vh.preview.setVisibility(View.GONE);
-			vh.text.setVisibility(View.VISIBLE);
-			vh.text.setText(item.getText());
-		} else {
-			vh.text.setVisibility(View.GONE);
-			vh.preview.setVisibility(View.VISIBLE);
-			vh.preview.setText(item.getPreview());
-		}
+		vh.title.setText(item.getTitle());
+		vh.text.setText(item.getText());
 
 		if(item.shouldShowDate()) {
 			vh.date.setVisibility(View.VISIBLE);
@@ -139,13 +136,20 @@ class BrowseAdapter extends RecyclerView.Adapter<BrowseViewHolder> {
 				for(int i = 0; i < cursor.getCount(); i++) {
 					DataItem dataItem = new DataItem(context, cursor.getLong(0), cursor.getString(1));
 
-					String thisDate = dataItem.getDate();
-					if(lastDate.equals(thisDate)) {
+					if(TextUtils.equals(lastDate, dataItem.getDate()))
 						dataItem.setShowDate(false);
-					}
-					lastDate = thisDate;
+					else
+						lastDate = dataItem.getDate();
 
-					data.add(dataItem);
+					if (lastItem == null ||
+						!TextUtils.equals(dataItem.getPackageName(), lastItem.getPackageName()) ||
+						!TextUtils.equals(dataItem.getTitle(), lastItem.getTitle()) ||
+						!TextUtils.equals(dataItem.getText(), lastItem.getText()) ||
+						!TextUtils.equals(dataItem.getDate(), lastItem.getDate())) {
+						data.add(dataItem);
+						lastItem = dataItem;
+					}
+
 					cursor.moveToNext();
 				}
 				cursor.close();
@@ -175,9 +179,8 @@ class BrowseAdapter extends RecyclerView.Adapter<BrowseViewHolder> {
 
 		private long id;
 		private String packageName;
-		private String appName;
+		private String title;
 		private String text;
-		private String preview;
 		private String date;
 		private boolean showDate;
 
@@ -186,17 +189,12 @@ class BrowseAdapter extends RecyclerView.Adapter<BrowseViewHolder> {
 			try {
 				JSONObject json = new JSONObject(str);
 				packageName = json.getString("packageName");
-				appName = Util.getAppNameFromPackage(context, packageName, false);
-				text = str;
-
-				String title = json.optString("title");
-				String text = json.optString("text");
-				preview = (title + "\n" + text).trim();
-
-				if(!iconCache.containsKey(packageName)) {
-					iconCache.put(packageName, Util.getAppIconFromPackage(context, packageName));
-				}
-
+				title = json.optString("title").trim();
+				if (title.length() > 100)
+					title = title.substring(0, 100);
+				text = json.optString("text").trim();
+				if (text.length() > 200)
+					text = text.substring(0, 200);
 				date = format.format(json.optLong("postTime"));
 				showDate = true;
 			} catch (JSONException e) {
@@ -212,16 +210,12 @@ class BrowseAdapter extends RecyclerView.Adapter<BrowseViewHolder> {
 			return packageName;
 		}
 
-		public String getAppName() {
-			return appName;
+		public String getTitle() {
+			return title.length() == 0 ? "-" : title;
 		}
 
 		public String getText() {
-			return text;
-		}
-
-		public String getPreview() {
-			return preview;
+			return text.length() == 0 ? "-" : text;
 		}
 
 		public String getDate() {

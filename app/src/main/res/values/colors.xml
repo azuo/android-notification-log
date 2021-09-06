@@ -5,10 +5,10 @@
     <color name="colorPrimaryDark">#263238</color>
     <color name="colorAccent">#F4B400</color>
 
-    <color name="colorDivider">#dcdcdc</color>
-
-    <color name="colorText">#202020</color>
-    <color name="colorTextMuted">#737373</color>
+    <!--
+    <color name="colorText">?android:attr/textColorPrimary</color>
+    <color name="colorTextMuted">?android:attr/textColorSecondary</color>
+    -->
     <color name="colorTextWhite">#ffffff</color>
     <color name="colorTextDanger">#F44336</color>
 

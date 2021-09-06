@@ -13,8 +13,7 @@ class BrowseViewHolder extends RecyclerView.ViewHolder {
 
 	public LinearLayout item;
 	public ImageView icon;
-	public TextView name;
-	public TextView preview;
+	public TextView title;
 	public TextView text;
 	public TextView date;
 
@@ -22,8 +21,7 @@ class BrowseViewHolder extends RecyclerView.ViewHolder {
 		super(view);
 		item = view.findViewById(R.id.item);
 		icon = view.findViewById(R.id.icon);
-		name = view.findViewById(R.id.name);
-		preview = view.findViewById(R.id.preview);
+		title = view.findViewById(R.id.title);
 		text = view.findViewById(R.id.text);
 		date = view.findViewById(R.id.date);
 	}

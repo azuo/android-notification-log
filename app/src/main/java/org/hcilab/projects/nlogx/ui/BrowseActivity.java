@@ -47,8 +47,7 @@ public class BrowseActivity extends AppCompatActivity implements SwipeRefreshLay
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-		MenuInflater inflater = getMenuInflater();
-		inflater.inflate(R.menu.browse, menu);
+		getMenuInflater().inflate(R.menu.browse, menu);
 		return super.onCreateOptionsMenu(menu);
 	}
 
@@ -57,6 +56,9 @@ public class BrowseActivity extends AppCompatActivity implements SwipeRefreshLay
 		switch (item.getItemId()) {
 			case R.id.menu_refresh:
 				update();
+				return true;
+			case android.R.id.home:
+				onBackPressed();
 				return true;
 		}
 		return super.onOptionsItemSelected(item);
@@ -67,7 +69,7 @@ public class BrowseActivity extends AppCompatActivity implements SwipeRefreshLay
 		recyclerView.setAdapter(adapter);
 
 		if(adapter.getItemCount() == 0) {
-			Toast.makeText(this, R.string.empty_log_file, Toast.LENGTH_LONG).show();
+			Toast.makeText(getApplicationContext(), R.string.empty_log_file, Toast.LENGTH_LONG).show();
 			finish();
 		}
 	}

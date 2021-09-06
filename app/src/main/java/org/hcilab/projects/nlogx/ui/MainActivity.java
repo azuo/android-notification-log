@@ -2,6 +2,7 @@ package org.hcilab.projects.nlogx.ui;
 
 import android.content.Intent;
 import android.database.sqlite.SQLiteDatabase;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -28,6 +29,8 @@ public class MainActivity extends AppCompatActivity {
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		getMenuInflater().inflate(R.menu.main, menu);
+		if (Build.VERSION.SDK_INT < 28)
+			menu.findItem(R.id.menu_standby).setEnabled(false).setVisible(false);
 		return true;
 	}
 
@@ -40,13 +43,16 @@ public class MainActivity extends AppCompatActivity {
 			case R.id.menu_export:
 				export();
 				return true;
-
+			case R.id.menu_standby:
+				if (Build.VERSION.SDK_INT >= 28)
+					startActivity(new Intent(this, StandbyAppsActivity.class));
+				return true;
 		}
 		return super.onOptionsItemSelected(item);
 	}
 
 	private void confirm() {
-		AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AlertDialogStyle);
+		AlertDialog.Builder builder = new AlertDialog.Builder(this);
 		builder.setTitle(R.string.dialog_delete_header);
 		builder.setMessage(R.string.dialog_delete_text);
 		builder.setNegativeButton(R.string.dialog_delete_no, (dialogInterface, i) -> {});

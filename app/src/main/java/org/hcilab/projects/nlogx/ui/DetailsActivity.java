@@ -83,8 +83,13 @@ public class DetailsActivity extends AppCompatActivity {
 
 	@Override
 	public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-		if(item.getItemId() == R.id.menu_delete) {
-			confirmDelete();
+		switch (item.getItemId()) {
+			case R.id.menu_delete:
+				confirmDelete();
+				return true;
+			case android.R.id.home:
+				onBackPressed();
+				return true;
 		}
 		return super.onOptionsItemSelected(item);
 	}
@@ -135,26 +140,34 @@ public class DetailsActivity extends AppCompatActivity {
 				card.setVisibility(View.VISIBLE);
 				ImageView icon = findViewById(R.id.icon);
 				icon.setImageDrawable(Util.getAppIconFromPackage(this, packageName));
-				TextView tvName = findViewById(R.id.name);
-				tvName.setText(Util.getAppNameFromPackage(this, packageName, false));
+				TextView tvTitle = findViewById(R.id.title);
+				String title   = json.optString("title").trim();
+				tvTitle.setText(title.length() == 0 ? "-" : title);
 				TextView tvText = findViewById(R.id.text);
-				String titleText   = json.optString("title");
-				String contentText = json.optString("text");
-				String text = (titleText + "\n" + contentText).trim();
-				tvText.setText(text);
-				tvText.setVisibility(!"".equals(text) ? View.VISIBLE : View.GONE);
+				String text = json.optString("text").trim();
+				tvText.setText(text.length() == 0 ? "-" : text);
 				TextView tvDate = findViewById(R.id.date);
-				if(SHOW_RELATIVE_DATE_TIME) {
-					tvDate.setText(DateUtils.getRelativeDateTimeString(
-							this,
-							json.optLong("when"),
-							DateUtils.MINUTE_IN_MILLIS,
-							DateUtils.WEEK_IN_MILLIS,
-							0));
-				} else {
-					DateFormat format = DateFormat.getDateTimeInstance(DateFormat.DEFAULT, DateFormat.SHORT, Locale.getDefault());
-					tvDate.setText(format.format(json.optLong("when")));
+				String appName = Util.getAppNameFromPackage(this, packageName, true);
+				StringBuilder sb = new StringBuilder();
+				if (appName != null && !appName.equals(packageName))
+					sb.append(appName);
+				long time = json.optLong("postTime");
+				if (time > 0) {
+					if (sb.length() > 0)
+						sb.append(" · ");
+					if (SHOW_RELATIVE_DATE_TIME) {
+						sb.append(DateUtils.getRelativeDateTimeString(
+								this,
+								time,
+								DateUtils.MINUTE_IN_MILLIS,
+								DateUtils.WEEK_IN_MILLIS,
+								0));
+					} else {
+						DateFormat format = DateFormat.getDateTimeInstance(DateFormat.DEFAULT, DateFormat.SHORT, Locale.getDefault());
+						sb.append(format.format(time));
+					}
 				}
+				tvDate.setText(sb.toString());
 
 				try {
 					ApplicationInfo app = this.getPackageManager().getApplicationInfo(packageName, 0);
@@ -175,7 +188,7 @@ public class DetailsActivity extends AppCompatActivity {
 	}
 
 	private void finishWithToast() {
-		Toast.makeText(this, R.string.details_error, Toast.LENGTH_SHORT).show();
+		Toast.makeText(getApplicationContext(), R.string.details_error, Toast.LENGTH_SHORT).show();
 		finish();
 	}
 
