@@ -1,18 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <color name="colorPrimary">#455a64</color>
-    <color name="colorPrimaryDark">#263238</color>
-    <color name="colorAccent">#F4B400</color>
+    <color name="colorPrimary">#214555</color>
+    <color name="colorPrimaryDark">#072b3b</color>
+    <color name="colorAccent">#4282f2</color>
 
     <!--
     <color name="colorText">?android:attr/textColorPrimary</color>
     <color name="colorTextMuted">?android:attr/textColorSecondary</color>
     -->
-    <color name="colorTextWhite">#ffffff</color>
-    <color name="colorTextDanger">#F44336</color>
 
-    <color name="colorBackgroundDanger">#C62828</color>
-    <color name="colorBackgroundSuccess">#4285F4</color>
+    <color name="colorTextWhite">#ffffff</color>
+    <color name="colorTextDanger">#f86734</color>
+
+    <color name="colorBackgroundDanger">#f0f7cf</color>
+    <color name="colorBackgroundSuccess">#d6f0ff</color>
 
 </resources>

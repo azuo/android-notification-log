@@ -4,11 +4,11 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ui.MainActivity">
+    tools:context=".ui.SettingsActivity">
 
-    <fragment
+    <androidx.fragment.app.FragmentContainerView
+        android:id="@+id/settings"
         android:name="org.hcilab.projects.nlogx.ui.SettingsFragment"
-        android:tag=".ui.SettingsFragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 

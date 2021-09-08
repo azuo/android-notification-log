@@ -8,6 +8,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Parcelable;
 import android.view.View;
 
 import androidx.core.content.FileProvider;
@@ -34,8 +35,8 @@ public class ExportTask extends AsyncTask<Void, Void, Void> {
 
 	private static final String EXPORT_FILE_NAME = "notification_export_%s.json";
 
-	private Context context;
-	private View view;
+	private final Context context;
+	private final View view;
 	private Snackbar snackbar;
 
 	public ExportTask(Context context, View view) {
@@ -53,7 +54,10 @@ public class ExportTask extends AsyncTask<Void, Void, Void> {
 	@Override
 	protected Void doInBackground(Void... params) {
 		// Create share folder
-		File exportPath = new File(context.getCacheDir(), "share");
+		File exportPath = context.getExternalCacheDir();
+		if (exportPath == null)
+			exportPath = context.getCacheDir();
+		exportPath = new File(exportPath, "share");
 		if(!exportPath.exists()) {
 			boolean mkdirsResult = exportPath.mkdirs();
 			if(Const.DEBUG) {
@@ -65,7 +69,7 @@ public class ExportTask extends AsyncTask<Void, Void, Void> {
 		File[] oldFiles = exportPath.listFiles();
 		if(oldFiles != null) {
 			for(File oldFile : oldFiles) {
-				if(oldFile.isFile() && oldFile.getName().startsWith("notification_export")) {
+				if(oldFile.isFile() && oldFile.getName().startsWith("notification-export")) {
 					boolean deleteResult = oldFile.delete();
 					if(Const.DEBUG) {
 						System.out.println("Existing cache file deleted: " + deleteResult);
@@ -203,6 +207,9 @@ public class ExportTask extends AsyncTask<Void, Void, Void> {
 				c.close();
 			}
 
+			db.close();
+			dbHelper.close();
+
 			outputStream.write("]\n\n}".getBytes());
 
 			outputStream.close();
@@ -216,9 +223,16 @@ public class ExportTask extends AsyncTask<Void, Void, Void> {
 
 		// Open the share dialog
 		Intent sharingIntent = new Intent(Intent.ACTION_SEND);
-		sharingIntent.setType("text/plain");
+		sharingIntent.setType("application/json");
 		sharingIntent.putExtra(Intent.EXTRA_STREAM, contentUri);
-		context.startActivity(Intent.createChooser(sharingIntent, context.getResources().getString(R.string.menu_export)));
+
+		Intent openingIntent = new Intent(Intent.ACTION_VIEW);
+		openingIntent.setDataAndType(contentUri, "text/plain");
+		openingIntent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+
+		Intent chooser = Intent.createChooser(sharingIntent, context.getResources().getString(R.string.menu_export));
+		chooser.putExtra(Intent.EXTRA_INITIAL_INTENTS, new Parcelable[] { openingIntent });
+		context.startActivity(chooser);
 
 		return null;
 	}

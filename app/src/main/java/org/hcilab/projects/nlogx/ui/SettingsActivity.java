@@ -18,17 +18,20 @@ import org.hcilab.projects.nlogx.misc.DatabaseHelper;
 import org.hcilab.projects.nlogx.misc.ExportTask;
 import org.hcilab.projects.nlogx.service.NotificationHandler;
 
-public class MainActivity extends AppCompatActivity {
+public class SettingsActivity extends AppCompatActivity {
+
+	public static final String EXTRA_ACTION = "action";
+	public static final String ACTION_REFRESH = "refresh";
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.activity_main);
+		setContentView(R.layout.activity_settings);
 	}
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-		getMenuInflater().inflate(R.menu.main, menu);
+		getMenuInflater().inflate(R.menu.settings, menu);
 		if (Build.VERSION.SDK_INT < 28)
 			menu.findItem(R.id.menu_standby).setEnabled(false).setVisible(false);
 		return true;
@@ -46,6 +49,9 @@ public class MainActivity extends AppCompatActivity {
 			case R.id.menu_standby:
 				if (Build.VERSION.SDK_INT >= 28)
 					startActivity(new Intent(this, StandbyAppsActivity.class));
+				return true;
+			case android.R.id.home:
+				onBackPressed();
 				return true;
 		}
 		return super.onOptionsItemSelected(item);
@@ -68,9 +74,16 @@ public class MainActivity extends AppCompatActivity {
 			db.execSQL(DatabaseHelper.SQL_CREATE_ENTRIES_POSTED);
 			db.execSQL(DatabaseHelper.SQL_DELETE_ENTRIES_REMOVED);
 			db.execSQL(DatabaseHelper.SQL_CREATE_ENTRIES_REMOVED);
+			db.close();
+			dbHelper.close();
+
 			Intent local = new Intent();
 			local.setAction(NotificationHandler.BROADCAST);
 			LocalBroadcastManager.getInstance(this).sendBroadcast(local);
+
+			Intent data = new Intent();
+			data.putExtra(EXTRA_ACTION, ACTION_REFRESH);
+			setResult(RESULT_OK, data);
 		} catch (Exception e) {
 			if(Const.DEBUG) e.printStackTrace();
 		}

@@ -112,7 +112,7 @@ class NotificationObject {
 			if (Build.VERSION.SDK_INT >= 26) no.put("shortcutId", str(n.getShortcutId()));
 			if (Build.VERSION.SDK_INT >= 29) no.put("locusId", str(n.getLocusId()));
 			if (LOG_TEXT) {
-				if (Build.VERSION.SDK_INT >= 26) no.put("setttingsText", str(n.getSettingsText()));
+				if (Build.VERSION.SDK_INT >= 26) no.put("settingsText", str(n.getSettingsText()));
 			}
 			if (n.extras != null) {
 				JSONObject eo = new JSONObject();

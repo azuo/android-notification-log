@@ -3,9 +3,9 @@ package org.hcilab.projects.nlogx.ui;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.widget.Toast;
+import android.view.View;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -15,33 +15,48 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import org.hcilab.projects.nlogx.R;
+import org.hcilab.projects.nlogx.misc.Util;
+
+import java.util.Objects;
 
 public class BrowseActivity extends AppCompatActivity implements SwipeRefreshLayout.OnRefreshListener {
 
-	private RecyclerView recyclerView;
 	private SwipeRefreshLayout swipeRefreshLayout;
+	private RecyclerView recyclerView;
+	private TextView emptyView;
 
 	@Override
 	protected void onCreate(@Nullable Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_browse);
 
-		RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this);
-		recyclerView = findViewById(R.id.list);
-		recyclerView.setLayoutManager(layoutManager);
-
 		swipeRefreshLayout = findViewById(R.id.swiper);
 		swipeRefreshLayout.setColorSchemeResources(R.color.colorAccent);
 		swipeRefreshLayout.setOnRefreshListener(this);
 
+		RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this);
+		recyclerView = findViewById(R.id.list);
+		recyclerView.setLayoutManager(layoutManager);
+
+		emptyView = findViewById(R.id.empty);
+
 		update();
+
+		if (!Util.isNotificationAccessEnabled(this))
+			startActivityForResult(new Intent(this, SettingsActivity.class), 1);
 	}
 
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
 		super.onActivityResult(requestCode, resultCode, data);
-		if (data != null && DetailsActivity.ACTION_REFRESH.equals(data.getStringExtra(DetailsActivity.EXTRA_ACTION))) {
+		if (data == null)
+			return;
+		if (SettingsActivity.ACTION_REFRESH.equals(data.getStringExtra(SettingsActivity.EXTRA_ACTION))) {
 			update();
+		} else {
+			int position = data.getIntExtra(DetailsActivity.EXTRA_DELETE, -1);
+			if (position >= 0)
+				((BrowseAdapter)Objects.requireNonNull(recyclerView.getAdapter())).remove(position);
 		}
 	}
 
@@ -54,9 +69,12 @@ public class BrowseActivity extends AppCompatActivity implements SwipeRefreshLay
 	@Override
 	public boolean onOptionsItemSelected(@NonNull MenuItem item) {
 		switch (item.getItemId()) {
-			case R.id.menu_refresh:
-				update();
+			case R.id.menu_settings:
+				startActivityForResult(new Intent(this, SettingsActivity.class), 1);
 				return true;
+			//case R.id.menu_refresh:
+			//	update();
+			//	return true;
 			case android.R.id.home:
 				onBackPressed();
 				return true;
@@ -68,9 +86,13 @@ public class BrowseActivity extends AppCompatActivity implements SwipeRefreshLay
 		BrowseAdapter adapter = new BrowseAdapter(this);
 		recyclerView.setAdapter(adapter);
 
-		if(adapter.getItemCount() == 0) {
-			Toast.makeText(getApplicationContext(), R.string.empty_log_file, Toast.LENGTH_LONG).show();
-			finish();
+		if (adapter.getItemCount() == 0) {
+			recyclerView.setVisibility(View.GONE);
+			emptyView.setVisibility(View.VISIBLE);
+		}
+		else {
+			recyclerView.setVisibility(View.VISIBLE);
+			emptyView.setVisibility(View.GONE);
 		}
 	}
 

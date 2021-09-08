@@ -25,16 +25,14 @@ public class Util {
 
 	public static String getAppNameFromPackage(Context context, String packageName, boolean returnNull) {
 		final PackageManager pm = context.getApplicationContext().getPackageManager();
-		ApplicationInfo ai;
+		String appName = null;
 		try {
-			ai = pm.getApplicationInfo(packageName, 0);
+			ApplicationInfo ai = pm.getApplicationInfo(packageName, 0);
+			appName = pm.getApplicationLabel(ai).toString();
 		} catch(final PackageManager.NameNotFoundException e) {
-			ai = null;
+			if(Const.DEBUG) e.printStackTrace();
 		}
-		if(returnNull) {
-			return ai == null ? null : pm.getApplicationLabel(ai).toString();
-		}
-		return (String) (ai != null ? pm.getApplicationLabel(ai) : packageName);
+		return appName != null || returnNull ? appName : packageName;
 	}
 
 	public static Drawable getAppIconFromPackage(Context context, String packageName) {
@@ -42,9 +40,7 @@ public class Util {
 		Drawable drawable = null;
 		try {
 			ApplicationInfo ai = pm.getApplicationInfo(packageName, 0);
-			if(ai != null) {
-				drawable = pm.getApplicationIcon(ai);
-			}
+			drawable = pm.getApplicationIcon(ai);
 		} catch (Exception e) {
 			if(Const.DEBUG) e.printStackTrace();
 		}

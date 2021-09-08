@@ -14,6 +14,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Objects;
 import java.util.TimeZone;
 
 import androidx.annotation.Nullable;
@@ -30,9 +31,9 @@ public class ActivityRecognitionIntentService extends IntentService {
 			return;
 		}
 
-		ActivityRecognitionResult result = ActivityRecognitionResult.extractResult(intent);
+		ActivityRecognitionResult result = Objects.requireNonNull(ActivityRecognitionResult.extractResult(intent));
 
-		ArrayList<DetectedActivity> detectedActivities = (ArrayList<DetectedActivity>) result.getProbableActivities();
+		ArrayList<DetectedActivity> detectedActivities = (ArrayList<DetectedActivity>)result.getProbableActivities();
 
 		ArrayList<String> activities = new ArrayList<>();
 		ArrayList<Integer> confidences = new ArrayList<>();

@@ -22,10 +22,6 @@ import org.hcilab.projects.nlogx.misc.Util;
 import org.hcilab.projects.nlogx.service.NotificationHandler;
 
 public class SettingsFragment extends PreferenceFragmentCompat {
-
-	public static final String TAG = SettingsFragment.class.getName();
-
-	private DatabaseHelper dbHelper;
 	private BroadcastReceiver updateReceiver;
 
 	private Preference prefStatus;
@@ -50,7 +46,7 @@ public class SettingsFragment extends PreferenceFragmentCompat {
 		prefBrowse = pm.findPreference(Const.PREF_BROWSE);
 		if(prefBrowse != null) {
 			prefBrowse.setOnPreferenceClickListener(preference -> {
-				startActivity(new Intent(getActivity(), BrowseActivity.class));
+				requireActivity().finish();
 				return true;
 			});
 		}
@@ -62,7 +58,7 @@ public class SettingsFragment extends PreferenceFragmentCompat {
 		if(prefAbout != null) {
 			prefAbout.setOnPreferenceClickListener(preference -> {
 				Intent intent = new Intent(Intent.ACTION_VIEW);
-				intent.setData(Uri.parse("https://github.com/interactionlab/android-notification-log"));
+				intent.setData(Uri.parse("https://github.com/azuo/android-notification-log"));
 				startActivity(intent);
 				return true;
 			});
@@ -78,12 +74,6 @@ public class SettingsFragment extends PreferenceFragmentCompat {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
-		try {
-			dbHelper = new DatabaseHelper(getActivity());
-		} catch (Exception e) {
-			if(Const.DEBUG) e.printStackTrace();
-		}
-
 		updateReceiver = new BroadcastReceiver() {
 			@Override
 			public void onReceive(Context context, Intent intent) {
@@ -98,33 +88,37 @@ public class SettingsFragment extends PreferenceFragmentCompat {
 
 		if(Util.isNotificationAccessEnabled(getActivity())) {
 			prefStatus.setSummary(R.string.settings_notification_access_enabled);
+			prefBrowse.setEnabled(true);
 			prefText.setEnabled(true);
 			prefOngoing.setEnabled(true);
 		} else {
 			prefStatus.setSummary(R.string.settings_notification_access_disabled);
+			prefBrowse.setEnabled(false);
 			prefText.setEnabled(false);
 			prefOngoing.setEnabled(false);
 		}
 
 		IntentFilter filter = new IntentFilter();
 		filter.addAction(NotificationHandler.BROADCAST);
-		LocalBroadcastManager.getInstance(getActivity()).registerReceiver(updateReceiver, filter);
+		LocalBroadcastManager.getInstance(requireActivity()).registerReceiver(updateReceiver, filter);
 
 		update();
 	}
 
 	@Override
 	public void onPause() {
-		LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(updateReceiver);
+		LocalBroadcastManager.getInstance(requireActivity()).unregisterReceiver(updateReceiver);
 		super.onPause();
 	}
 
 	private void update() {
 		try {
+			DatabaseHelper dbHelper = new DatabaseHelper(getActivity());
 			SQLiteDatabase db = dbHelper.getReadableDatabase();
 			long numRowsPosted = DatabaseUtils.queryNumEntries(db, DatabaseHelper.PostedEntry.TABLE_NAME);
-			int stringResource = numRowsPosted == 1 ? R.string.settings_browse_summary_singular : R.string.settings_browse_summary_plural;
-			prefBrowse.setSummary(getString(stringResource, numRowsPosted));
+			db.close();
+			dbHelper.close();
+			prefBrowse.setSummary(String.valueOf(numRowsPosted));
 		} catch (Exception e) {
 			if(Const.DEBUG) e.printStackTrace();
 		}

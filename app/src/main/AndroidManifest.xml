@@ -25,8 +25,9 @@
         <!-- Activities -->
 
         <activity
-            android:name=".ui.MainActivity"
-            android:label="@string/app_name">
+            android:name=".ui.BrowseActivity"
+            android:label="@string/app_name"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -37,12 +38,12 @@
         </activity>
 
         <activity
-            android:name=".ui.BrowseActivity"
-            android:label="@string/activity_browse"
-            android:parentActivityName=".ui.MainActivity">
+            android:name=".ui.SettingsActivity"
+            android:label="@string/activity_settings"
+            android:parentActivityName=".ui.BrowseActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value=".ui.MainActivity" />
+                android:value=".ui.BrowseActivity" />
         </activity>
 
         <activity
@@ -56,11 +57,11 @@
 
         <activity
             android:name=".ui.StandbyAppsActivity"
-            android:label="@string/menu_standby"
-            android:parentActivityName=".ui.MainActivity">
+            android:label="@string/activity_standby"
+            android:parentActivityName=".ui.SettingsActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value=".ui.MainActivity" />
+                android:value=".ui.SettingsActivity" />
         </activity>
 
         <!-- Services -->

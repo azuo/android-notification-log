@@ -33,17 +33,16 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.text.DateFormat;
-import java.util.Locale;
 
 public class DetailsActivity extends AppCompatActivity {
 
 	public static final String EXTRA_ID = "id";
-	public static final String EXTRA_ACTION = "action";
-	public static final String ACTION_REFRESH = "refresh";
+	public static final String EXTRA_DELETE = "delete";
 
 	private static final boolean SHOW_RELATIVE_DATE_TIME = true;
 
-	private String id;
+	private long id;
+	private int delete;
 	private String packageName;
 	private int appUid;
 	private AlertDialog dialog;
@@ -54,9 +53,10 @@ public class DetailsActivity extends AppCompatActivity {
 		setContentView(R.layout.activity_details);
 
 		Intent intent = getIntent();
-		if(intent != null) {
-			id = intent.getStringExtra(EXTRA_ID);
-			if(id != null) {
+		if (intent != null) {
+			id = intent.getLongExtra(EXTRA_ID, -1);
+			delete = intent.getIntExtra(EXTRA_DELETE, -1);
+			if (id >= 0 && delete >= 0) {
 				loadDetails(id);
 			} else {
 				finishWithToast();
@@ -68,7 +68,7 @@ public class DetailsActivity extends AppCompatActivity {
 
 	@Override
 	protected void onPause() {
-		if(dialog != null && dialog.isShowing()) {
+		if (dialog != null && dialog.isShowing()) {
 			dialog.dismiss();
 			dialog = null;
 		}
@@ -94,7 +94,7 @@ public class DetailsActivity extends AppCompatActivity {
 		return super.onOptionsItemSelected(item);
 	}
 
-	private void loadDetails(String id) {
+	private void loadDetails(long id) {
 		JSONObject json = null;
 		String str = "error";
 		try {
@@ -102,24 +102,23 @@ public class DetailsActivity extends AppCompatActivity {
 			SQLiteDatabase db = databaseHelper.getReadableDatabase();
 
 			Cursor cursor = db.query(DatabaseHelper.PostedEntry.TABLE_NAME,
-					new String[] {
-							DatabaseHelper.PostedEntry.COLUMN_NAME_CONTENT,
-					},
-					DatabaseHelper.PostedEntry._ID + " = ?",
-					new String[] {
-							id
-					},
-					null,
-					null,
-					null,
-					"1");
+				new String[] { DatabaseHelper.PostedEntry.COLUMN_NAME_CONTENT },
+				DatabaseHelper.PostedEntry._ID + " = ?",
+				new String[] { "" + id },
+				null,
+				null,
+				null,
+				"1");
 
-			if(cursor != null && cursor.getCount() == 1 && cursor.moveToFirst()) {
-				try {
-					json = new JSONObject(cursor.getString(0));
-					str = json.toString(2);
-				} catch (JSONException e) {
-					if(Const.DEBUG) e.printStackTrace();
+			if( cursor != null) {
+				if (cursor.getCount() == 1 && cursor.moveToFirst()) {
+					try {
+						json = new JSONObject(cursor.getString(0));
+						str = json.toString(2);
+					}
+					catch (JSONException e) {
+						if (Const.DEBUG) e.printStackTrace();
+					}
 				}
 				cursor.close();
 			}
@@ -130,13 +129,15 @@ public class DetailsActivity extends AppCompatActivity {
 			if(Const.DEBUG) e.printStackTrace();
 		}
 		TextView tvJSON = findViewById(R.id.json);
+		if (Build.VERSION.SDK_INT >= 25)
+			tvJSON.setRevealOnFocusHint(false);
 		tvJSON.setText(str);
 
 		CardView card = findViewById(R.id.card);
 		CardView buttons = findViewById(R.id.buttons);
 		if(json != null) {
 			packageName = json.optString("packageName");
-			if(!TextUtils.isEmpty(packageName)) {
+			if (!TextUtils.isEmpty(packageName)) {
 				card.setVisibility(View.VISIBLE);
 				ImageView icon = findViewById(R.id.icon);
 				icon.setImageDrawable(Util.getAppIconFromPackage(this, packageName));
@@ -157,13 +158,14 @@ public class DetailsActivity extends AppCompatActivity {
 						sb.append(" · ");
 					if (SHOW_RELATIVE_DATE_TIME) {
 						sb.append(DateUtils.getRelativeDateTimeString(
-								this,
-								time,
-								DateUtils.MINUTE_IN_MILLIS,
-								DateUtils.WEEK_IN_MILLIS,
-								0));
+							this,
+							time,
+							DateUtils.MINUTE_IN_MILLIS,
+							DateUtils.WEEK_IN_MILLIS,
+							DateUtils.FORMAT_ABBREV_RELATIVE | DateUtils.FORMAT_SHOW_TIME)
+						);
 					} else {
-						DateFormat format = DateFormat.getDateTimeInstance(DateFormat.DEFAULT, DateFormat.SHORT, Locale.getDefault());
+						DateFormat format = DateFormat.getDateTimeInstance(DateFormat.DEFAULT, DateFormat.SHORT);
 						sb.append(format.format(time));
 					}
 				}
@@ -193,7 +195,7 @@ public class DetailsActivity extends AppCompatActivity {
 	}
 
 	private void confirmDelete() {
-		if(dialog != null && dialog.isShowing()) {
+		if (dialog != null && dialog.isShowing()) {
 			dialog.dismiss();
 		}
 
@@ -205,23 +207,23 @@ public class DetailsActivity extends AppCompatActivity {
 				.show();
 	}
 
-	private DialogInterface.OnClickListener doDelete = (dialog, which) -> {
+	private final DialogInterface.OnClickListener doDelete = (dialog, which) -> {
 		int affectedRows = 0;
 		try {
 			DatabaseHelper databaseHelper = new DatabaseHelper(this);
 			SQLiteDatabase db = databaseHelper.getWritableDatabase();
 			affectedRows = db.delete(DatabaseHelper.PostedEntry.TABLE_NAME,
-					DatabaseHelper.PostedEntry._ID + " = ?",
-					new String[] { id });
+				DatabaseHelper.PostedEntry._ID + " = ?",
+				new String[] { "" + id });
 			db.close();
 			databaseHelper.close();
 		} catch (Exception e) {
 			if(Const.DEBUG) e.printStackTrace();
 		}
 
-		if(affectedRows > 0) {
+		if (affectedRows > 0) {
 			Intent data = new Intent();
-			data.putExtra(EXTRA_ACTION, ACTION_REFRESH);
+			data.putExtra(EXTRA_DELETE, delete);
 			setResult(RESULT_OK, data);
 			finish();
 		}
@@ -230,7 +232,7 @@ public class DetailsActivity extends AppCompatActivity {
 	public void openNotificationSettings(View v) {
 		try {
 			Intent intent = new Intent();
-			if(Build.VERSION.SDK_INT > 25) {
+			if (Build.VERSION.SDK_INT > 25) {
 				intent.setAction("android.settings.APP_NOTIFICATION_SETTINGS");
 				intent.putExtra("android.provider.extra.APP_PACKAGE", packageName);
 			} else if(Build.VERSION.SDK_INT >= 21) {

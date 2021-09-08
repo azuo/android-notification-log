@@ -18,8 +18,8 @@ public class NotificationHandler {
 	public static final String BROADCAST = "org.hcilab.projects.nlogx.update";
 	public static final String LOCK = "lock";
 
-	private Context context;
-	private SharedPreferences sp;
+	private final Context context;
+	private final SharedPreferences sp;
 
 	NotificationHandler(Context context) {
 		this.context = context;
@@ -28,7 +28,7 @@ public class NotificationHandler {
 
 	void handlePosted(StatusBarNotification sbn) {
 		if(sbn.isOngoing() && !sp.getBoolean(Const.PREF_ONGOING, false)) {
-			if(Const.DEBUG) System.out.println("posted ongoing!");
+			//if(Const.DEBUG) System.out.println("posted ongoing!");
 			return;
 		}
 		boolean text = sp.getBoolean(Const.PREF_TEXT, true);
@@ -38,7 +38,7 @@ public class NotificationHandler {
 
 	void handleRemoved(StatusBarNotification sbn, int reason) {
 		if(sbn.isOngoing() && !sp.getBoolean(Const.PREF_ONGOING, false)) {
-			if(Const.DEBUG) System.out.println("removed ongoing!");
+			//if(Const.DEBUG) System.out.println("removed ongoing!");
 			return;
 		}
 		NotificationObject no = new NotificationObject(context, sbn, false, reason);

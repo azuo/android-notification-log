@@ -62,7 +62,7 @@ public class NotificationListener extends NotificationListenerService {
 
 	@Override
 	public void onListenerDisconnected() {
-		if(Build.VERSION.SDK_INT >= 24) {
+		if(Build.VERSION.SDK_INT >= 21) {
 			instance = null;
 			stopActivityRecognition();
 			stopFusedLocationIntentService();

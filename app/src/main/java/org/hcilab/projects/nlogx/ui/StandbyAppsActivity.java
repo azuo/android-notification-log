@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -20,13 +21,14 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.TreeMap;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
+import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SearchView;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -37,23 +39,23 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 public class StandbyAppsActivity extends AppCompatActivity
 		implements SwipeRefreshLayout.OnRefreshListener, SearchView.OnQueryTextListener {
 
-	private RecyclerView recyclerView;
 	private SwipeRefreshLayout swipeRefreshLayout;
-	private HashMap<String, Drawable> iconCache = new HashMap<>();
+	private RecyclerView recyclerView;
 	private SearchView searchView;
+	private final HashMap<String, Drawable> iconCache = new HashMap<>();
 
 	@Override
 	protected void onCreate(@Nullable Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_browse);
 
-		RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this);
-		recyclerView = findViewById(R.id.list);
-		recyclerView.setLayoutManager(layoutManager);
-
 		swipeRefreshLayout = findViewById(R.id.swiper);
 		swipeRefreshLayout.setColorSchemeResources(R.color.colorAccent);
 		swipeRefreshLayout.setOnRefreshListener(this);
+
+		RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this);
+		recyclerView = findViewById(R.id.list);
+		recyclerView.setLayoutManager(layoutManager);
 
 		update();
 	}
@@ -61,17 +63,36 @@ public class StandbyAppsActivity extends AppCompatActivity
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		getMenuInflater().inflate(R.menu.standby, menu);
-		searchView = ((SearchView)menu.findItem(R.id.menu_search).getActionView());
+		searchView = (SearchView)menu.findItem(R.id.menu_search).getActionView();
 		searchView.setOnQueryTextListener(this);
+		// remove space on the left side of SearchView
+		View f = searchView.findViewById(androidx.appcompat.R.id.search_edit_frame);
+		if (f != null) {
+			ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams)f.getLayoutParams();
+			params.leftMargin = (int)(-8.0f * getResources().getDisplayMetrics().density + 0.5f);
+			f.setLayoutParams(params);
+		}
+		// if launched from shortcut
+		if (Intent.ACTION_VIEW.equals(getIntent().getAction())) {
+			final ActionBar bar = getSupportActionBar();
+			if (bar != null) {
+				bar.setDisplayHomeAsUpEnabled(!searchView.isIconified());
+				searchView.setOnSearchClickListener(v -> bar.setDisplayHomeAsUpEnabled(true));
+				searchView.setOnCloseListener(() -> {
+					bar.setDisplayHomeAsUpEnabled(false);
+					return false;
+				});
+			}
+		}
 		return super.onCreateOptionsMenu(menu);
 	}
 
 	@Override
 	public boolean onOptionsItemSelected(@NonNull MenuItem item) {
 		switch (item.getItemId()) {
-			case R.id.menu_refresh:
-				update();
-				return true;
+			//case R.id.menu_refresh:
+			//	update();
+			//	return true;
 			case android.R.id.home:
 				onBackPressed();
 				return true;
@@ -91,15 +112,19 @@ public class StandbyAppsActivity extends AppCompatActivity
 
 	@Override
 	public void onBackPressed() {
-		if (!searchView.isIconified())
+		if (!searchView.isIconified()) {
+			//searchView.onActionViewCollapsed();
+			if (!TextUtils.isEmpty(searchView.getQuery()))
+				searchView.setQuery("", false);
 			searchView.setIconified(true);
+		}
 		else
 			super.onBackPressed();
 	}
 
 	@Override
 	public boolean onQueryTextChange(String newText) {
-		((Adapter)recyclerView.getAdapter()).applyFilter(newText.trim());
+		((Adapter)Objects.requireNonNull(recyclerView.getAdapter())).applyFilter(newText.trim());
 		return true;
 	}
 
@@ -110,7 +135,7 @@ public class StandbyAppsActivity extends AppCompatActivity
 
 	private class Adapter extends RecyclerView.Adapter<BrowseViewHolder> {
 		private List<String[]> buckets = null;
-		private List<String[]> data = null;
+		private List<String[]> data;
 
 		@SuppressWarnings("unchecked")
 		public Adapter() {
@@ -178,13 +203,13 @@ public class StandbyAppsActivity extends AppCompatActivity
 			if (query.length() == 0)
 				data = buckets;
 			else if (buckets != null){
-				String q = query.toLowerCase(Locale.ROOT);
+				String q = query.toLowerCase();
 				data = new ArrayList<>(buckets.size());
 				for (String[] v : buckets) {
 					if (v[1] == null)
 						v[1] = Util.getAppNameFromPackage(StandbyAppsActivity.this, v[0], false);
 					for (String s : v) {
-						if (s != null && s.toLowerCase(Locale.ROOT).contains(q)) {
+						if (s != null && s.toLowerCase().contains(q)) {
 							data.add(v);
 							break;
 						}
