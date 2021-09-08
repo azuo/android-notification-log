@@ -13,9 +13,10 @@
     <string name="menu_settings">Settings</string>
     <string name="menu_refresh">Refresh</string>
     <string name="menu_delete">Delete</string>
-    <string name="menu_export">Export</string>
-    <string name="menu_search">Search</string>
+    <string name="menu_clear">Delete log</string>
+    <string name="menu_export">Export log</string>
     <string name="menu_standby">Standby apps</string>
+    <string name="menu_search">Search</string>
 
     <!-- Settings categories -->
     <string name="category_settings">Settings</string>
@@ -29,6 +30,7 @@
 
     <!-- Browse -->
     <string name="settings_browse">Notifications logged</string>
+    <string name="empty_log_file">No notifications logged yet!</string>
 
     <!-- Log text -->
     <string name="settings_text">Log text</string>
@@ -42,8 +44,8 @@
     <string name="snackbar_export">Exporting, please wait…</string>
 
     <!-- Delete -->
-    <string name="dialog_delete_header">Confirm deletion</string>
-    <string name="dialog_delete_text">Do you really want to delete the log file? This cannot be undone.</string>
+    <string name="dialog_delete_header">Delete log</string>
+    <string name="dialog_delete_text">Do you really want to delete all logged notifications? This cannot be undone.</string>
     <string name="dialog_delete_yes">Delete</string>
     <string name="dialog_delete_no">Cancel</string>
 
@@ -56,7 +58,6 @@
 
     <!-- Details -->
     <string name="details_error">Unable to load the details of this entry.</string>
-    <string name="empty_log_file">No notifications logged yet!</string>
     <string name="open_notification_settings">Notification settings</string>
 
     <!-- Delete Notification -->

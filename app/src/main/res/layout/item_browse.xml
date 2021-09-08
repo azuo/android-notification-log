@@ -1,14 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              xmlns:tools="http://schemas.android.com/tools"
-              android:orientation="vertical"
-              android:layout_width="match_parent"
-              android:layout_height="wrap_content">
-
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="?android:listDivider" />
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
 
     <TextView
         android:visibility="gone"
@@ -17,21 +13,19 @@
         android:layout_height="wrap_content"
         android:paddingTop="3dp"
         android:paddingBottom="4dp"
-        android:textSize="14sp"
-        android:textColor="?android:textColorSecondary"
         android:gravity="center"
-        android:background="?android:listDivider"
-        tools:ignore="HardcodedText" />
+        android:textAppearance="@style/BodyTextAppearance"
+        android:background="?android:listDivider" />
 
     <LinearLayout
         android:id="@+id/item"
         android:orientation="horizontal"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:padding="16dp"
         android:clickable="true"
         android:focusable="true"
-        android:background="?android:selectableItemBackground"
-        android:padding="16dp">
+        android:background="?android:selectableItemBackground">
 
         <ImageView
             android:id="@+id/icon"
@@ -55,8 +49,7 @@
                 android:layout_marginBottom="4dp"
                 android:lines="1"
                 android:ellipsize="end"
-                android:textSize="16sp"
-                android:textColor="?android:textColorPrimary" />
+                android:textAppearance="@style/TitleTextAppearance" />
 
             <TextView
                 android:id="@+id/text"
@@ -64,11 +57,15 @@
                 android:layout_height="wrap_content"
                 android:maxLines="2"
                 android:ellipsize="end"
-                android:textSize="14sp"
-                android:textColor="?android:textColorSecondary" />
+                android:textAppearance="@style/BodyTextAppearance" />
 
         </LinearLayout>
 
     </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="?android:listDivider" />
 
 </LinearLayout>

@@ -33,15 +33,18 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.text.DateFormat;
+import java.util.Objects;
 
 public class DetailsActivity extends AppCompatActivity {
 
 	public static final String EXTRA_ID = "id";
+	public static final String EXTRA_MIN_ID = "minId";
 	public static final String EXTRA_DELETE = "delete";
 
 	private static final boolean SHOW_RELATIVE_DATE_TIME = true;
 
 	private long id;
+	private long minId;
 	private int delete;
 	private String packageName;
 	private int appUid;
@@ -51,12 +54,14 @@ public class DetailsActivity extends AppCompatActivity {
 	protected void onCreate(@Nullable Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_details);
+		Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
 
 		Intent intent = getIntent();
 		if (intent != null) {
 			id = intent.getLongExtra(EXTRA_ID, -1);
+			minId = intent.getLongExtra(EXTRA_MIN_ID, id);
 			delete = intent.getIntExtra(EXTRA_DELETE, -1);
-			if (id >= 0 && delete >= 0) {
+			if (id >= minId && minId >= 0 && delete >= 0) {
 				loadDetails(id);
 			} else {
 				finishWithToast();
@@ -213,8 +218,8 @@ public class DetailsActivity extends AppCompatActivity {
 			DatabaseHelper databaseHelper = new DatabaseHelper(this);
 			SQLiteDatabase db = databaseHelper.getWritableDatabase();
 			affectedRows = db.delete(DatabaseHelper.PostedEntry.TABLE_NAME,
-				DatabaseHelper.PostedEntry._ID + " = ?",
-				new String[] { "" + id });
+				DatabaseHelper.PostedEntry._ID + " between ? and ?",
+				new String[] { "" + minId, "" + id });
 			db.close();
 			databaseHelper.close();
 		} catch (Exception e) {

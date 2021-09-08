@@ -33,7 +33,7 @@ public class NotificationListener extends NotificationListenerService {
 	@Override
 	public void onCreate() {
 		super.onCreate();
-		if(Build.VERSION.SDK_INT < 21) {
+		if (Build.VERSION.SDK_INT < 21) {
 			instance = this;
 			startActivityRecognition();
 			startFusedLocationIntentService();
@@ -42,7 +42,7 @@ public class NotificationListener extends NotificationListenerService {
 
 	@Override
 	public void onDestroy() {
-		if(Build.VERSION.SDK_INT < 24) {
+		if (Build.VERSION.SDK_INT < 21) {
 			instance = null;
 			stopActivityRecognition();
 			stopFusedLocationIntentService();
@@ -53,7 +53,7 @@ public class NotificationListener extends NotificationListenerService {
 	@Override
 	public void onListenerConnected() {
 		super.onListenerConnected();
-		if(Build.VERSION.SDK_INT >= 21) {
+		if (Build.VERSION.SDK_INT >= 21) {
 			instance = this;
 			startActivityRecognition();
 			startFusedLocationIntentService();
@@ -62,7 +62,7 @@ public class NotificationListener extends NotificationListenerService {
 
 	@Override
 	public void onListenerDisconnected() {
-		if(Build.VERSION.SDK_INT >= 21) {
+		if (Build.VERSION.SDK_INT >= 21) {
 			instance = null;
 			stopActivityRecognition();
 			stopFusedLocationIntentService();

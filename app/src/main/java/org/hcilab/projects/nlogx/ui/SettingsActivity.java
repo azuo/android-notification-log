@@ -18,6 +18,8 @@ import org.hcilab.projects.nlogx.misc.DatabaseHelper;
 import org.hcilab.projects.nlogx.misc.ExportTask;
 import org.hcilab.projects.nlogx.service.NotificationHandler;
 
+import java.util.Objects;
+
 public class SettingsActivity extends AppCompatActivity {
 
 	public static final String EXTRA_ACTION = "action";
@@ -27,6 +29,7 @@ public class SettingsActivity extends AppCompatActivity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_settings);
+		Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
 	}
 
 	@Override
@@ -40,7 +43,7 @@ public class SettingsActivity extends AppCompatActivity {
 	@Override
 	public boolean onOptionsItemSelected(@NonNull MenuItem item) {
 		switch (item.getItemId()) {
-			case R.id.menu_delete:
+			case R.id.menu_clear:
 				confirm();
 				return true;
 			case R.id.menu_export:

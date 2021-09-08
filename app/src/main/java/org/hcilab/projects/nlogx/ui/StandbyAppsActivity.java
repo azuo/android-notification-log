@@ -48,6 +48,8 @@ public class StandbyAppsActivity extends AppCompatActivity
 	protected void onCreate(@Nullable Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_browse);
+		if (!Intent.ACTION_VIEW.equals(getIntent().getAction()))
+			Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
 
 		swipeRefreshLayout = findViewById(R.id.swiper);
 		swipeRefreshLayout.setColorSchemeResources(R.color.colorAccent);
@@ -74,15 +76,13 @@ public class StandbyAppsActivity extends AppCompatActivity
 		}
 		// if launched from shortcut
 		if (Intent.ACTION_VIEW.equals(getIntent().getAction())) {
-			final ActionBar bar = getSupportActionBar();
-			if (bar != null) {
-				bar.setDisplayHomeAsUpEnabled(!searchView.isIconified());
-				searchView.setOnSearchClickListener(v -> bar.setDisplayHomeAsUpEnabled(true));
-				searchView.setOnCloseListener(() -> {
-					bar.setDisplayHomeAsUpEnabled(false);
-					return false;
-				});
-			}
+			ActionBar bar = Objects.requireNonNull(getSupportActionBar());
+			bar.setDisplayHomeAsUpEnabled(!searchView.isIconified());
+			searchView.setOnSearchClickListener(v -> bar.setDisplayHomeAsUpEnabled(true));
+			searchView.setOnCloseListener(() -> {
+				bar.setDisplayHomeAsUpEnabled(false);
+				return false;
+			});
 		}
 		return super.onCreateOptionsMenu(menu);
 	}

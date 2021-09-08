@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -8,9 +9,10 @@
     <LinearLayout
         android:orientation="vertical"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:background="?android:listDivider">
 
-        <androidx.cardview.widget.CardView
+        <com.google.android.material.card.MaterialCardView
             android:id="@+id/card"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -42,16 +44,14 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="4dp"
-                        android:textSize="16sp"
-                        android:textColor="?android:textColorPrimary" />
+                        android:textAppearance="@style/TitleTextAppearance" />
 
                     <TextView
                         android:id="@+id/text"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="16dp"
-                        android:textSize="14sp"
-                        android:textColor="?android:textColorSecondary"
+                        android:textAppearance="@style/BodyTextAppearance"
                         android:autoLink="all"
                         android:textIsSelectable="true" />
 
@@ -59,16 +59,15 @@
                         android:id="@+id/date"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:textSize="14sp"
-                        android:textColor="?android:textColorSecondary" />
+                        android:textAppearance="@style/BodyTextAppearance" />
 
                 </LinearLayout>
 
             </LinearLayout>
 
-        </androidx.cardview.widget.CardView>
+        </com.google.android.material.card.MaterialCardView>
 
-        <androidx.cardview.widget.CardView
+        <com.google.android.material.card.MaterialCardView
             android:visibility="gone"
             android:id="@+id/buttons"
             android:layout_width="match_parent"
@@ -76,16 +75,17 @@
             android:layout_marginBottom="8dp">
 
             <Button
+                style="@style/Widget.MaterialComponents.Button.TextButton"
+                android:textColor="@color/colorAccent"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/open_notification_settings"
-                style="@style/Widget.AppCompat.Button.Borderless.Colored"
                 android:padding="16dp"
                 android:onClick="openNotificationSettings" />
 
-        </androidx.cardview.widget.CardView>
+        </com.google.android.material.card.MaterialCardView>
 
-        <androidx.cardview.widget.CardView
+        <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
@@ -98,14 +98,13 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:padding="8dp"
-                    android:textColor="?android:textColorSecondary"
-                    android:textSize="14sp"
+                    android:textAppearance="@style/BodyTextAppearance"
                     android:lineSpacingExtra="4dp"
                     android:textIsSelectable="true" />
 
             </HorizontalScrollView>
 
-        </androidx.cardview.widget.CardView>
+        </com.google.android.material.card.MaterialCardView>
 
     </LinearLayout>
 

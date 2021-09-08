@@ -50,9 +50,12 @@ class BrowseAdapter extends RecyclerView.Adapter<BrowseViewHolder> {
 		View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_browse, parent, false);
 		BrowseViewHolder vh = new BrowseViewHolder(view);
 		vh.item.setOnClickListener(v -> {
+			int position = vh.getBindingAdapterPosition();
+			DataItem item = data.get(position);
 			Intent intent = new Intent(context, DetailsActivity.class);
-			intent.putExtra(DetailsActivity.EXTRA_ID, vh.getItemId());
-			intent.putExtra(DetailsActivity.EXTRA_DELETE, vh.getBindingAdapterPosition());
+			intent.putExtra(DetailsActivity.EXTRA_ID, item.getId());
+			intent.putExtra(DetailsActivity.EXTRA_MIN_ID, item.getMinId());
+			intent.putExtra(DetailsActivity.EXTRA_DELETE, position);
 			if (Build.VERSION.SDK_INT >= 21) {
 				Pair<View, String> p1 = Pair.create(vh.icon, "icon");
 				@SuppressWarnings("unchecked") ActivityOptionsCompat options = ActivityOptionsCompat.makeSceneTransitionAnimation(context, p1);
@@ -128,7 +131,7 @@ class BrowseAdapter extends RecyclerView.Adapter<BrowseViewHolder> {
 						DatabaseHelper.PostedEntry.COLUMN_NAME_CONTENT
 					},
 					DatabaseHelper.PostedEntry._ID + " < ?",
-					new String[] { "" + (lastItem == null ? Long.MAX_VALUE : lastItem.getId()) },
+					new String[] { "" + (lastItem == null ? Long.MAX_VALUE : lastItem.getMinId()) },
 					null,
 					null,
 					DatabaseHelper.PostedEntry._ID + " DESC",
@@ -155,7 +158,7 @@ class BrowseAdapter extends RecyclerView.Adapter<BrowseViewHolder> {
 						data.add(dataItem);
 						lastItem = dataItem;
 					} else {
-						lastItem.id = dataItem.getId();
+						lastItem.minId = dataItem.getId();
 					}
 				} while (cursor.moveToNext());
 				cursor.close();
@@ -170,12 +173,14 @@ class BrowseAdapter extends RecyclerView.Adapter<BrowseViewHolder> {
 			if(Const.DEBUG) e.printStackTrace();
 		}
 
-		notifyItemRangeInserted(before, data.size() - before);
+		if (data.size() > before)
+			notifyItemRangeInserted(before, data.size() - before);
 	}
 
 	private static class DataItem {
 
 		private long id;
+		private long minId;
 		private String packageName;
 		private String title;
 		private String text;
@@ -183,7 +188,7 @@ class BrowseAdapter extends RecyclerView.Adapter<BrowseViewHolder> {
 		private boolean showDate;
 
 		DataItem(long id, String str, DateFormat format) {
-			this.id = id;
+			this.id = minId = id;
 			try {
 				JSONObject json = new JSONObject(str);
 				packageName = json.getString("packageName");
@@ -203,6 +208,10 @@ class BrowseAdapter extends RecyclerView.Adapter<BrowseViewHolder> {
 
 		public long getId() {
 			return id;
+		}
+
+		public long getMinId() {
+			return minId;
 		}
 
 		public String getPackageName() {
