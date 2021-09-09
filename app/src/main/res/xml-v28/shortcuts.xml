@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shortcuts
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <shortcut
+        android:shortcutId="standby"
+        android:enabled="true"
+        android:icon="@mipmap/ic_launcher"
+        android:shortcutShortLabel="@string/activity_standby"
+        android:shortcutLongLabel="@string/menu_standby"
+        android:shortcutDisabledMessage="@string/menu_standby">
+
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:targetPackage="org.hcilab.projects.nlogx.azuo"
+            android:targetClass="org.hcilab.projects.nlogx.ui.StandbyAppsActivity" />
+
+    </shortcut>
+
+</shortcuts>
