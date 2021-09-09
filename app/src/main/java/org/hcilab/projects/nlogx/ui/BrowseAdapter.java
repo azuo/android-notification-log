@@ -78,7 +78,7 @@ class BrowseAdapter extends RecyclerView.Adapter<BrowseViewHolder> {
 		if (iconCache.get(packageName) != null) {
 			vh.icon.setImageDrawable(iconCache.get(packageName));
 		} else {
-			vh.icon.setImageResource(R.mipmap.ic_launcher);
+			vh.icon.setImageResource(android.R.mipmap.sym_def_app_icon);
 		}
 
 		vh.title.setText(item.getTitle());

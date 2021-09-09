@@ -6,6 +6,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -140,12 +141,16 @@ public class DetailsActivity extends AppCompatActivity {
 
 		CardView card = findViewById(R.id.card);
 		CardView buttons = findViewById(R.id.buttons);
-		if(json != null) {
+		if (json != null) {
 			packageName = json.optString("packageName");
 			if (!TextUtils.isEmpty(packageName)) {
 				card.setVisibility(View.VISIBLE);
-				ImageView icon = findViewById(R.id.icon);
-				icon.setImageDrawable(Util.getAppIconFromPackage(this, packageName));
+				ImageView ivIcon = findViewById(R.id.icon);
+				Drawable icon = Util.getAppIconFromPackage(this, packageName);
+				if (icon != null)
+					ivIcon.setImageDrawable(icon);
+				else
+					ivIcon.setImageResource(android.R.mipmap.sym_def_app_icon);
 				TextView tvTitle = findViewById(R.id.title);
 				String title   = json.optString("title").trim();
 				tvTitle.setText(title.length() == 0 ? "-" : title);
@@ -186,7 +191,6 @@ public class DetailsActivity extends AppCompatActivity {
 				}
 			} else {
 				card.setVisibility(View.GONE);
-
 			}
 		} else {
 			card.setVisibility(View.GONE);
