@@ -130,6 +130,7 @@ public class StandbyAppsActivity extends AppCompatActivity
 
 	@Override
 	public boolean onQueryTextSubmit(String query) {
+		searchView.clearFocus();
 		return true;
 	}
 
