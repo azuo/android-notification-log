@@ -2,7 +2,6 @@
 <resources>
 
     <string name="app_name" translatable="false">Notification Log</string>
-    <string name="notification_access_label">@string/app_name</string>
 
     <!-- Activities -->
     <string name="activity_settings">Settings</string>
@@ -65,5 +64,9 @@
     <string name="delete_dialog_text">Do you really want to delete this notification? This cannot be undone.</string>
     <string name="delete_dialog_yes">Delete</string>
     <string name="delete_dialog_no">Cancel</string>
+
+    <!-- StandbyApps -->
+    <string name="app_not_found">Unable to open the app info of this entry.</string>
+    <string name="usage_access_disabled">Disabled — Click here to enable</string>
 
 </resources>

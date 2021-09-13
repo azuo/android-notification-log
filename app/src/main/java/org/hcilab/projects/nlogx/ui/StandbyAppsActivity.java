@@ -1,16 +1,20 @@
 package org.hcilab.projects.nlogx.ui;
 
+import android.app.AppOpsManager;
 import android.app.usage.UsageStatsManager;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import org.hcilab.projects.nlogx.R;
@@ -42,6 +46,8 @@ public class StandbyAppsActivity extends AppCompatActivity
 	private SwipeRefreshLayout swipeRefreshLayout;
 	private RecyclerView recyclerView;
 	private SearchView searchView;
+	private TextView emptyView;
+
 	private final HashMap<String, Drawable> iconCache = new HashMap<>();
 
 	@Override
@@ -57,8 +63,19 @@ public class StandbyAppsActivity extends AppCompatActivity
 
 		RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this);
 		recyclerView = findViewById(R.id.list);
+		recyclerView.setHasFixedSize(true);
 		recyclerView.setLayoutManager(layoutManager);
 
+		emptyView = findViewById(R.id.empty);
+		emptyView.setText(R.string.usage_access_disabled);
+		emptyView.setOnClickListener(v -> startActivityForResult(new Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS), 1));
+
+		update();
+	}
+
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+		super.onActivityResult(requestCode, resultCode, data);
 		update();
 	}
 
@@ -101,7 +118,22 @@ public class StandbyAppsActivity extends AppCompatActivity
 	}
 
 	private void update() {
-		recyclerView.setAdapter(new Adapter());
+		Adapter adapter = new Adapter();
+		recyclerView.setAdapter(adapter);
+
+		if (!adapter.isEnabled()) {
+			recyclerView.setVisibility(View.GONE);
+			emptyView.setVisibility(View.VISIBLE);
+		}
+		else {
+			recyclerView.setVisibility(View.VISIBLE);
+			emptyView.setVisibility(View.GONE);
+			if (searchView != null) {
+				CharSequence query = searchView.getQuery();
+				if (!TextUtils.isEmpty(query))
+					adapter.applyFilter(query.toString());
+			}
+		}
 	}
 
 	@Override
@@ -124,7 +156,7 @@ public class StandbyAppsActivity extends AppCompatActivity
 
 	@Override
 	public boolean onQueryTextChange(String newText) {
-		((Adapter)Objects.requireNonNull(recyclerView.getAdapter())).applyFilter(newText.trim());
+		((Adapter)Objects.requireNonNull(recyclerView.getAdapter())).applyFilter(newText);
 		return true;
 	}
 
@@ -135,11 +167,22 @@ public class StandbyAppsActivity extends AppCompatActivity
 	}
 
 	private class Adapter extends RecyclerView.Adapter<BrowseViewHolder> {
-		private List<String[]> buckets = null;
-		private List<String[]> data;
+		private List<DataItem> data = null;
+		private List<DataItem> filtered = null;
+		private boolean enabled = false;
 
 		@SuppressWarnings("unchecked")
 		public Adapter() {
+			setHasStableIds(true);
+
+			AppOpsManager appOpsManager = (AppOpsManager)getSystemService(Context.APP_OPS_SERVICE);
+			if (appOpsManager == null)
+				return;
+			int mode = appOpsManager.checkOpNoThrow(AppOpsManager.OPSTR_GET_USAGE_STATS, android.os.Process.myUid(), getPackageName());
+			if (mode != AppOpsManager.MODE_ALLOWED)
+				return;
+
+			enabled = true;
 			Map<String, Integer> b = null;
 			try {
 				UsageStatsManager m = (UsageStatsManager)getSystemService(USAGE_STATS_SERVICE);
@@ -150,70 +193,75 @@ public class StandbyAppsActivity extends AppCompatActivity
 				if (e instanceof InvocationTargetException)
 					e = ((InvocationTargetException)e).getTargetException();
 				Toast.makeText(getApplicationContext(), e.toString(), Toast.LENGTH_LONG).show();
-				finish();
 			}
-			if (b != null) {
-				buckets = new ArrayList<>(b.size());
-				for (Map.Entry<String, Integer> e : new TreeMap<>(b).entrySet()) {
-					String[] v = new String[3];
-					v[0] = e.getKey();
-					//v[1] = Util.getAppNameFromPackage(StandbyAppsActivity.this, v[0], false);
-					switch (e.getValue()) {
-						case 5: //UsageStatsManager.STANDBY_BUCKET_EXEMPTED
-							v[2] = "EXEMPTED";
-							break;
-						case android.app.usage.UsageStatsManager.STANDBY_BUCKET_ACTIVE:
-							v[2] = "ACTIVE";
-							break;
-						case android.app.usage.UsageStatsManager.STANDBY_BUCKET_WORKING_SET:
-							v[2] = "WORKING_SET";
-							break;
-						case android.app.usage.UsageStatsManager.STANDBY_BUCKET_FREQUENT:
-							v[2] = "FREQUENT";
-							break;
-						case android.app.usage.UsageStatsManager.STANDBY_BUCKET_RARE:
-							v[2] = "RARE";
-							break;
-						case 50: //UsageStatsManager.STANDBY_BUCKET_NEVER
-							v[2] = "NEVER";
-							break;
-						default:
-							v[2] = "" + e.getValue();
-							break;
-					}
-					buckets.add(v);
+			if (b == null)
+				return;
+
+			//TreeMap<String, Integer> m = new TreeMap<>(b);	// not work since b may contain null keys?!
+			TreeMap<String, Integer> m = new TreeMap<>();
+			for (Map.Entry<String, Integer> e : b.entrySet()) {
+				if (e.getKey() != null)
+					m.put(e.getKey(), e.getValue());
+			}
+			data = new ArrayList<>(m.size());
+			for (Map.Entry<String, Integer> e : m.entrySet()) {
+				DataItem item = new DataItem(data.size(), e.getKey());
+				switch (e.getValue()) {
+					case 5: //UsageStatsManager.STANDBY_BUCKET_EXEMPTED
+						item.setBucket("EXEMPTED");
+						break;
+					case android.app.usage.UsageStatsManager.STANDBY_BUCKET_ACTIVE:
+						item.setBucket("ACTIVE");
+						break;
+					case android.app.usage.UsageStatsManager.STANDBY_BUCKET_WORKING_SET:
+						item.setBucket("WORKING_SET");
+						break;
+					case android.app.usage.UsageStatsManager.STANDBY_BUCKET_FREQUENT:
+						item.setBucket("FREQUENT");
+						break;
+					case android.app.usage.UsageStatsManager.STANDBY_BUCKET_RARE:
+						item.setBucket("RARE");
+						break;
+					case 50: //UsageStatsManager.STANDBY_BUCKET_NEVER
+						item.setBucket("NEVER");
+						break;
+					default:
+						item.setBucket("" + e.getValue());
+						break;
 				}
-				// call getAppNameFromPackage in a background thread
-				new Thread() {
-					@Override
-					public void run() {
-						List<String[]> b = buckets;
-						if (b != null) {
-							for (String[] v : b) {
-								if (v[1] == null)
-									v[1] = Util.getAppNameFromPackage(StandbyAppsActivity.this, v[0], false);
-							}
-						}
-					}
-				}.start();
+				data.add(item);
 			}
-			data = buckets;
+			filtered = data;
+
+			// lazy load appName in a background thread
+			new Thread() {
+				@Override
+				public void run() {
+					List<DataItem> d = data;
+					if (d != null) {
+						for (DataItem item : d)
+							item.getAppName();
+					}
+				}
+			}.start();
+		}
+
+		public boolean isEnabled() {
+			return enabled;
 		}
 
 		public void applyFilter(String query) {
-			if (query.length() == 0)
-				data = buckets;
-			else if (buckets != null){
-				String q = query.toLowerCase();
-				data = new ArrayList<>(buckets.size());
-				for (String[] v : buckets) {
-					if (v[1] == null)
-						v[1] = Util.getAppNameFromPackage(StandbyAppsActivity.this, v[0], false);
-					for (String s : v) {
-						if (s != null && s.toLowerCase().contains(q)) {
-							data.add(v);
-							break;
-						}
+			String q = query.trim().toLowerCase();
+			if (q.length() == 0)
+				filtered = data;
+			else if (data != null){
+				filtered = new ArrayList<>(data.size());
+				for (DataItem item : data) {
+					if (item.getPackageName().toLowerCase().contains(q) ||
+						item.getAppName().toLowerCase().contains(q) ||
+						item.getBucket().toLowerCase().contains(q)
+					) {
+						filtered.add(item);
 					}
 				}
 			}
@@ -234,35 +282,75 @@ public class StandbyAppsActivity extends AppCompatActivity
 					startActivity(i);
 				}
 				else
-					Toast.makeText(getApplicationContext(), "AppInfo not found", Toast.LENGTH_LONG).show();
+					Toast.makeText(getApplicationContext(), R.string.app_not_found, Toast.LENGTH_LONG).show();
 			});
 			return vh;
 		}
 
 		@Override
 		public void onBindViewHolder(@NonNull BrowseViewHolder vh, int position) {
-			String[] v = data.get(position);
+			DataItem item  = filtered.get(position);
 
-			if (!iconCache.containsKey(v[0])) {
-				iconCache.put(v[0], Util.getAppIconFromPackage(StandbyAppsActivity.this, v[0]));
+			String packageName = item.getPackageName();
+			if (!iconCache.containsKey(packageName)) {
+				iconCache.put(packageName, Util.getAppIconFromPackage(StandbyAppsActivity.this, packageName));
 			}
-			if (iconCache.get(v[0]) != null) {
-				vh.icon.setImageDrawable(iconCache.get(v[0]));
+			if (iconCache.get(packageName) != null) {
+				vh.icon.setImageDrawable(iconCache.get(packageName));
 			} else {
 				vh.icon.setImageResource(android.R.mipmap.sym_def_app_icon);
 			}
 
-			vh.item.setTag(v[0]);
+			vh.item.setTag(packageName);
 
-			if (v[1] == null)
-				v[1] = Util.getAppNameFromPackage(StandbyAppsActivity.this, v[0], false);
-			vh.title.setText(v[1]);
-			vh.text.setText(v[1].equals(v[0]) ? v[2] : v[2] + "\n" + v[0]);
+			String appName = item.getAppName();
+			vh.title.setText(appName);
+			vh.text.setText(appName.equals(packageName) ? item.getBucket() : item.getBucket() + "\n" + packageName);
 		}
 
 		@Override
 		public int getItemCount() {
-			return data == null ? 0 : data.size();
+			return filtered == null ? 0 : filtered.size();
+		}
+
+		@Override
+		public long getItemId(int position) {
+			return filtered.get(position).getId();
+		}
+	}
+
+	private class DataItem {
+		private final long id;
+		private final String packageName;
+		private String appName;
+		private String bucket;
+
+		public DataItem(long id, String packageName) {
+			this.id = id;
+			this.packageName = packageName;
+		}
+
+		public long getId() {
+			return id;
+		}
+
+		public String getPackageName() {
+			return packageName;
+		}
+
+		public String getAppName() {
+			// lazy fetch appName
+			if (appName == null)
+				appName = Util.getAppNameFromPackage(StandbyAppsActivity.this, packageName, false);
+			return appName;
+		}
+
+		public void setBucket(String bucket) {
+			this.bucket = bucket;
+		}
+
+		public String getBucket() {
+			return bucket;
 		}
 	}
 }

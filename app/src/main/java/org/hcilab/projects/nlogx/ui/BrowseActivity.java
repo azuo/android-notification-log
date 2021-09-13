@@ -36,6 +36,7 @@ public class BrowseActivity extends AppCompatActivity implements SwipeRefreshLay
 
 		RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this);
 		recyclerView = findViewById(R.id.list);
+		recyclerView.setHasFixedSize(true);
 		recyclerView.setLayoutManager(layoutManager);
 
 		emptyView = findViewById(R.id.empty);
