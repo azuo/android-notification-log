@@ -1,5 +1,6 @@
 package org.hcilab.projects.nlogx.misc;
 
+import android.annotation.SuppressLint;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
@@ -156,6 +157,7 @@ public class Util {
 		return "undefined";
 	}
 
+	@SuppressLint("MissingPermission")
 	public static boolean isNetworkAvailable(Context context) {
 		ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
 		if(cm != null) {
@@ -169,6 +171,7 @@ public class Util {
 		return false;
 	}
 
+	@SuppressLint("MissingPermission")
 	public static String getConnectivityType(Context context) {
 		try {
 			ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);

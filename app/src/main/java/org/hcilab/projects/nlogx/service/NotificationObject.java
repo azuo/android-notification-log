@@ -46,6 +46,7 @@ class NotificationObject {
 			if (Build.VERSION.SDK_INT >= 21) o.put("user", str(sbn.getUser()));
 			else                             o.put("userId", sbn.getUserId());
 			if (Build.VERSION.SDK_INT >= 24) o.put("group", sbn.isGroup());
+			if (Build.VERSION.SDK_INT >= 30) o.put("appGroup", sbn.isAppGroup());
 			if (Build.VERSION.SDK_INT >= 21) o.put("groupKey", str(sbn.getGroupKey()));
 			if (Build.VERSION.SDK_INT >= 24) o.put("overrideGroupKey", str(sbn.getOverrideGroupKey()));
 			o.put("ongoing", sbn.isOngoing());
@@ -186,14 +187,6 @@ class NotificationObject {
 
 			if (reason >= 0)
 				o.put("removeReason", reason);
-
-			if (Const.ENABLE_ACTIVITY_RECOGNITION || Const.ENABLE_LOCATION_SERVICE) {
-				SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
-				String s = sp.getString(Const.PREF_LAST_ACTIVITY, null);
-				if (!TextUtils.isEmpty(s)) o.put("lastActivity", new JSONObject(s));
-				s = sp.getString(Const.PREF_LAST_LOCATION, null);
-				if (!TextUtils.isEmpty(s)) o.put("lastLocation", new JSONObject(s));
-			}
 		} catch (Exception e) {
 			if(Const.DEBUG) e.printStackTrace();
 		}

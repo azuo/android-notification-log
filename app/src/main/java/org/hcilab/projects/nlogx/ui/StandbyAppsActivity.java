@@ -210,17 +210,20 @@ public class StandbyAppsActivity extends AppCompatActivity
 					case 5: //UsageStatsManager.STANDBY_BUCKET_EXEMPTED
 						item.setBucket("EXEMPTED");
 						break;
-					case android.app.usage.UsageStatsManager.STANDBY_BUCKET_ACTIVE:
+					case UsageStatsManager.STANDBY_BUCKET_ACTIVE:
 						item.setBucket("ACTIVE");
 						break;
-					case android.app.usage.UsageStatsManager.STANDBY_BUCKET_WORKING_SET:
+					case UsageStatsManager.STANDBY_BUCKET_WORKING_SET:
 						item.setBucket("WORKING_SET");
 						break;
-					case android.app.usage.UsageStatsManager.STANDBY_BUCKET_FREQUENT:
+					case UsageStatsManager.STANDBY_BUCKET_FREQUENT:
 						item.setBucket("FREQUENT");
 						break;
-					case android.app.usage.UsageStatsManager.STANDBY_BUCKET_RARE:
+					case UsageStatsManager.STANDBY_BUCKET_RARE:
 						item.setBucket("RARE");
+						break;
+					case UsageStatsManager.STANDBY_BUCKET_RESTRICTED:
+						item.setBucket("RESTRICTED");
 						break;
 					case 50: //UsageStatsManager.STANDBY_BUCKET_NEVER
 						item.setBucket("NEVER");

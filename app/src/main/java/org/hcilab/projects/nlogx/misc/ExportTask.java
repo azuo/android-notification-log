@@ -1,5 +1,6 @@
 package org.hcilab.projects.nlogx.misc;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
@@ -69,7 +70,7 @@ public class ExportTask extends AsyncTask<Void, Void, Void> {
 		File[] oldFiles = exportPath.listFiles();
 		if(oldFiles != null) {
 			for(File oldFile : oldFiles) {
-				if(oldFile.isFile() && oldFile.getName().startsWith("notification-export")) {
+				if(oldFile.isFile() && oldFile.getName().startsWith("notification_export")) {
 					boolean deleteResult = oldFile.delete();
 					if(Const.DEBUG) {
 						System.out.println("Existing cache file deleted: " + deleteResult);
@@ -163,7 +164,7 @@ public class ExportTask extends AsyncTask<Void, Void, Void> {
 			if(c != null) {
 				c.moveToFirst();
 				for(int i = 0; i < c.getCount(); i++) {
-					String content = c.getString(c.getColumnIndex(DatabaseHelper.PostedEntry.COLUMN_NAME_CONTENT));
+					@SuppressLint("Range") String content = c.getString(c.getColumnIndex(DatabaseHelper.PostedEntry.COLUMN_NAME_CONTENT));
 					outputStream.write("\t".getBytes());
 					outputStream.write(content.getBytes());
 
@@ -192,7 +193,7 @@ public class ExportTask extends AsyncTask<Void, Void, Void> {
 			if(c != null) {
 				c.moveToFirst();
 				for(int i = 0; i < c.getCount(); i++) {
-					String content = c.getString(c.getColumnIndex(DatabaseHelper.RemovedEntry.COLUMN_NAME_CONTENT));
+					@SuppressLint("Range") String content = c.getString(c.getColumnIndex(DatabaseHelper.RemovedEntry.COLUMN_NAME_CONTENT));
 					outputStream.write("\t".getBytes());
 					outputStream.write(content.getBytes());
 
