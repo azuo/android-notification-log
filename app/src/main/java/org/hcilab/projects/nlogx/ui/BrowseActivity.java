@@ -14,10 +14,10 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
+import java.util.Objects;
+
 import org.hcilab.projects.nlogx.R;
 import org.hcilab.projects.nlogx.misc.Util;
-
-import java.util.Objects;
 
 public class BrowseActivity extends AppCompatActivity implements SwipeRefreshLayout.OnRefreshListener {
 
@@ -56,8 +56,14 @@ public class BrowseActivity extends AppCompatActivity implements SwipeRefreshLay
 			update();
 		} else {
 			int position = data.getIntExtra(DetailsActivity.EXTRA_DELETE, -1);
-			if (position >= 0)
-				((BrowseAdapter)Objects.requireNonNull(recyclerView.getAdapter())).remove(position);
+			if (position >= 0) {
+				BrowseAdapter adapter = (BrowseAdapter)recyclerView.getAdapter();
+				Objects.requireNonNull(adapter).remove(position);
+				if (adapter.getItemCount() == 0) {
+					recyclerView.setVisibility(View.GONE);
+					emptyView.setVisibility(View.VISIBLE);
+				}
+			}
 		}
 	}
 

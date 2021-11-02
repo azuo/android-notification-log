@@ -17,10 +17,10 @@ import android.provider.Settings;
 
 import androidx.core.content.PermissionChecker;
 
-import org.hcilab.projects.nlogx.BuildConfig;
-
 import java.util.ArrayList;
 import java.util.List;
+
+import org.hcilab.projects.nlogx.BuildConfig;
 
 public class Util {
 

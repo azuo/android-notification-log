@@ -16,12 +16,6 @@ import androidx.core.content.FileProvider;
 
 import com.google.android.material.snackbar.Snackbar;
 
-import org.hcilab.projects.nlogx.BuildConfig;
-import org.hcilab.projects.nlogx.R;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.io.File;
 import java.io.FileOutputStream;
 import java.text.SimpleDateFormat;
@@ -29,6 +23,12 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.TimeZone;
+
+import org.hcilab.projects.nlogx.BuildConfig;
+import org.hcilab.projects.nlogx.R;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 public class ExportTask extends AsyncTask<Void, Void, Void> {
 

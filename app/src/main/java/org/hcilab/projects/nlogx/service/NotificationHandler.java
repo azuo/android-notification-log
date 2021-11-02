@@ -7,11 +7,11 @@ import android.content.SharedPreferences;
 import android.database.sqlite.SQLiteDatabase;
 import android.service.notification.StatusBarNotification;
 
-import org.hcilab.projects.nlogx.misc.Const;
-import org.hcilab.projects.nlogx.misc.DatabaseHelper;
-
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.preference.PreferenceManager;
+
+import org.hcilab.projects.nlogx.misc.Const;
+import org.hcilab.projects.nlogx.misc.DatabaseHelper;
 
 public class NotificationHandler {
 

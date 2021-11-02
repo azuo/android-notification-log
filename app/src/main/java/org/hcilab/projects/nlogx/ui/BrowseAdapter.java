@@ -17,16 +17,16 @@ import androidx.core.app.ActivityOptionsCompat;
 import androidx.core.util.Pair;
 import androidx.recyclerview.widget.RecyclerView;
 
+import java.text.DateFormat;
+import java.util.ArrayList;
+import java.util.HashMap;
+
 import org.hcilab.projects.nlogx.R;
 import org.hcilab.projects.nlogx.misc.Const;
 import org.hcilab.projects.nlogx.misc.DatabaseHelper;
 import org.hcilab.projects.nlogx.misc.Util;
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import java.text.DateFormat;
-import java.util.ArrayList;
-import java.util.HashMap;
 
 class BrowseAdapter extends RecyclerView.Adapter<BrowseViewHolder> {
 
@@ -57,12 +57,18 @@ class BrowseAdapter extends RecyclerView.Adapter<BrowseViewHolder> {
 			intent.putExtra(DetailsActivity.EXTRA_MIN_ID, item.getMinId());
 			intent.putExtra(DetailsActivity.EXTRA_DELETE, position);
 			if (Build.VERSION.SDK_INT >= 21) {
-				Pair<View, String> p1 = Pair.create(vh.icon, "icon");
-				@SuppressWarnings("unchecked") ActivityOptionsCompat options = ActivityOptionsCompat.makeSceneTransitionAnimation(context, p1);
+				@SuppressWarnings("unchecked")
+				ActivityOptionsCompat options = ActivityOptionsCompat.makeSceneTransitionAnimation(
+					context,
+					Pair.create(vh.icon, "icon"),
+					Pair.create((View)vh.title.getParent(), "summary")
+				);
 				context.startActivityForResult(intent, 1, options.toBundle());
 			} else {
 				context.startActivityForResult(intent, 1);
 			}
+			v.setClickable(false);
+			v.postDelayed(() -> v.setClickable(true), 500);
 		});
 		return vh;
 	}
@@ -107,8 +113,15 @@ class BrowseAdapter extends RecyclerView.Adapter<BrowseViewHolder> {
 	}
 
 	public void remove(int position) {
-		data.remove(position);
+		DataItem item = data.remove(position);
 		notifyItemRemoved(position);
+		if (item.shouldShowDate() && position < data.size()) {
+			item = data.get(position);
+			if (!item.shouldShowDate()) {
+				item.setShowDate(true);
+				notifyItemChanged(position);
+			}
+		}
 	}
 
 	private void loadMore() {
@@ -158,7 +171,7 @@ class BrowseAdapter extends RecyclerView.Adapter<BrowseViewHolder> {
 						data.add(dataItem);
 						lastItem = dataItem;
 					} else {
-						lastItem.minId = dataItem.getId();
+						lastItem.setMinId(dataItem.getId());
 					}
 				} while (cursor.moveToNext());
 				cursor.close();
@@ -179,7 +192,7 @@ class BrowseAdapter extends RecyclerView.Adapter<BrowseViewHolder> {
 
 	private static class DataItem {
 
-		private long id;
+		private final long id;
 		private long minId;
 		private String packageName;
 		private String title;
@@ -212,6 +225,10 @@ class BrowseAdapter extends RecyclerView.Adapter<BrowseViewHolder> {
 
 		public long getMinId() {
 			return minId;
+		}
+
+		public void setMinId(long minId) {
+			this.minId = minId;
 		}
 
 		public String getPackageName() {

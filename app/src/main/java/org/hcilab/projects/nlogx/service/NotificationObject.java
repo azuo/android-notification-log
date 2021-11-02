@@ -3,21 +3,25 @@ package org.hcilab.projects.nlogx.service;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.os.Build;
-import android.preference.PreferenceManager;
+import android.os.Bundle;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
-import android.text.TextUtils;
 
+import androidx.annotation.NonNull;
 import androidx.core.app.NotificationCompat;
+
+import java.lang.reflect.Array;
+import java.lang.reflect.Method;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Map;
 
 import org.hcilab.projects.nlogx.misc.Const;
 import org.hcilab.projects.nlogx.misc.Util;
+import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
-
-import java.lang.reflect.Method;
-import java.util.Arrays;
 
 class NotificationObject {
 	private final JSONObject json;
@@ -114,36 +118,12 @@ class NotificationObject {
 			if (Build.VERSION.SDK_INT >= 29) no.put("locusId", str(n.getLocusId()));
 			if (LOG_TEXT) {
 				if (Build.VERSION.SDK_INT >= 26) no.put("settingsText", str(n.getSettingsText()));
-			}
-			if (n.extras != null) {
-				JSONObject eo = new JSONObject();
-				no.put("extras", eo);
-				String[] tmp = n.extras.getStringArray(NotificationCompat.EXTRA_PEOPLE);
-				eo.putOpt("people", tmp != null ? Arrays.toString(tmp) : null);
-				eo.putOpt("template", n.extras.getString(NotificationCompat.EXTRA_TEMPLATE));
-				if (LOG_TEXT) {
-					eo.putOpt("title", n.extras.getCharSequence(NotificationCompat.EXTRA_TITLE));
-					eo.putOpt("title.big", n.extras.getCharSequence(NotificationCompat.EXTRA_TITLE_BIG));
-					eo.putOpt("text", n.extras.getCharSequence(NotificationCompat.EXTRA_TEXT));
-					eo.putOpt("subText", n.extras.getCharSequence(NotificationCompat.EXTRA_SUB_TEXT));
-					eo.putOpt("infoText", n.extras.getCharSequence(NotificationCompat.EXTRA_INFO_TEXT));
-					eo.putOpt("summaryText", n.extras.getCharSequence(NotificationCompat.EXTRA_SUMMARY_TEXT));
-					eo.putOpt("bigText", n.extras.getCharSequence(NotificationCompat.EXTRA_BIG_TEXT));
-					CharSequence[] lines = n.extras.getCharSequenceArray(NotificationCompat.EXTRA_TEXT_LINES);
-					if(lines != null) {
-						StringBuilder sb = new StringBuilder();
-						for (CharSequence line : lines)
-							sb.append(line).append('\n');
-						eo.put("textLines", sb.toString());
-					}
-				}
+				no.put("extras", wrap(n.extras));
 			}
 
 			if (Build.VERSION.SDK_INT >= 21) {
-				JSONObject so = new JSONObject();
-				o.put("service", so);
-				so.put("listenerHints", NotificationListener.getListenerHints());
-				so.put("interruptionFilter", NotificationListener.getInterruptionFilter());
+				o.put("listenerHints", NotificationListener.getListenerHints());
+				o.put("interruptionFilter", NotificationListener.getInterruptionFilter());
 				NotificationListenerService.Ranking ranking = new NotificationListenerService.Ranking();
 				NotificationListenerService.RankingMap rankingMap = NotificationListener.getRanking();
 				if (rankingMap != null && rankingMap.getRanking(key, ranking)) {
@@ -197,7 +177,39 @@ class NotificationObject {
 		return s == null ? JSONObject.NULL : s.toString();
 	}
 
+	private static Object wrap(Object v) throws JSONException {
+		if (v instanceof Bundle) {
+			JSONObject r = new JSONObject();
+			for (String k : ((Bundle)v).keySet())
+				r.put(k, wrap(((Bundle)v).get(k)));
+			return r;
+		}
+		else if (v instanceof Map) {
+			JSONObject r = new JSONObject();
+			for (Map.Entry<?, ?> e : ((Map<?, ?>)v).entrySet())
+				r.put(String.valueOf(e.getKey()), wrap(e.getValue()));
+			return r;
+		}
+		else if (v instanceof Collection) {
+			JSONArray r = new JSONArray();
+			for (Object e : (Collection<?>)v)
+				r.put(wrap(e));
+			return r;
+		}
+		else if (v != null && v.getClass().isArray()) {
+			JSONArray r = new JSONArray();
+			for (int i = 0; i < Array.getLength(v); ++ i)
+				r.put(wrap(Array.get(v, i)));
+			return r;
+		}
+		else {
+			Object r = JSONObject.wrap(v);
+			return r == null ? str(v) : r;
+		}
+	}
+
 	@Override
+	@NonNull
 	public String toString() {
 		return json.toString();
 	}

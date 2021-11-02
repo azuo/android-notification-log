@@ -12,13 +12,13 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
+import java.util.Objects;
+
 import org.hcilab.projects.nlogx.R;
 import org.hcilab.projects.nlogx.misc.Const;
 import org.hcilab.projects.nlogx.misc.DatabaseHelper;
 import org.hcilab.projects.nlogx.misc.ExportTask;
 import org.hcilab.projects.nlogx.service.NotificationHandler;
-
-import java.util.Objects;
 
 public class SettingsActivity extends AppCompatActivity {
 

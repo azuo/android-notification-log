@@ -26,15 +26,15 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
 
+import java.text.DateFormat;
+import java.util.Objects;
+
 import org.hcilab.projects.nlogx.R;
 import org.hcilab.projects.nlogx.misc.Const;
 import org.hcilab.projects.nlogx.misc.DatabaseHelper;
 import org.hcilab.projects.nlogx.misc.Util;
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import java.text.DateFormat;
-import java.util.Objects;
 
 public class DetailsActivity extends AppCompatActivity {
 
@@ -200,7 +200,7 @@ public class DetailsActivity extends AppCompatActivity {
 
 	private void finishWithToast() {
 		Toast.makeText(getApplicationContext(), R.string.details_error, Toast.LENGTH_SHORT).show();
-		finish();
+		supportFinishAfterTransition();
 	}
 
 	private void confirmDelete() {
@@ -234,7 +234,7 @@ public class DetailsActivity extends AppCompatActivity {
 			Intent data = new Intent();
 			data.putExtra(EXTRA_DELETE, delete);
 			setResult(RESULT_OK, data);
-			finish();
+			supportFinishAfterTransition();
 		}
 	};
 
